@@ -1,0 +1,65 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String    @id @default(uuid())
+  username     String    @unique
+  email        String    @unique
+  passwordHash String
+  role         String    @default("user")
+  createdAt    DateTime  @default(now())
+
+  devices      Device[]
+  sessions     Session[]
+  auditLogs    AuditLog[]
+}
+
+model Device {
+  id          String   @id @default(uuid())
+  userId      String
+  deviceName  String
+  deviceKey   String   @unique
+  status      String   @default("offline")
+  isTrusted   Boolean  @default(true)
+  lastSeenAt  DateTime?
+  createdAt   DateTime @default(now())
+
+  user        User @relation(fields: [userId], references: [id])
+
+  sessions    Session[]
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  deviceId     String
+  refreshToken String
+  ipAddress    String?
+  userAgent    String?
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  user         User   @relation(fields: [userId], references: [id])
+  device       Device @relation(fields: [deviceId], references: [id])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid())
+  userId      String?
+  action      String
+  targetType  String?
+  targetId    String?
+  ipAddress   String?
+  status      String
+  detail      String?
+  createdAt   DateTime @default(now())
+
+  user        User? @relation(fields: [userId], references: [id])
+}
+
