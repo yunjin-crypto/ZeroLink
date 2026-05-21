@@ -39,7 +39,7 @@ model Session {
   id           String   @id @default(uuid())
   userId       String
   deviceId     String
-  refreshToken String
+  refreshToken String @db.Text
   ipAddress    String?
   userAgent    String?
   expiresAt    DateTime
